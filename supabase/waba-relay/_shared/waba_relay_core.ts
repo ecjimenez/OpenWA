@@ -149,6 +149,44 @@ export async function listarMensagens(db: SupabaseClient, params: URLSearchParam
   return { mensagens, proximo_after: mensagens.at(-1)?.criada_em ?? after ?? null };
 }
 
+/**
+ * Conversas do número, com o estado da janela de 24h — é o que o painel usa
+ * pra decidir entre campo livre e seletor de template no cabeçalho do chat.
+ */
+export async function listarChats(db: SupabaseClient, params: URLSearchParams) {
+  const metaPhone = params.get('phone');
+  if (!metaPhone) throw new Error('contrato: parâmetro phone (meta_phone_number_id) é obrigatório');
+
+  const { data: phone, error: erroPhone } = await db.schema('waba').from('phone_numbers')
+    .select('id').eq('meta_phone_number_id', metaPhone).maybeSingle();
+  if (erroPhone) throw erroPhone;
+  if (!phone?.id) throw new Error(`contrato: número ${metaPhone} não está no registry`);
+
+  const { data, error } = await db.schema('waba').from('contacts')
+    .select('id, wa_id, profile_name, last_inbound_at, last_outbound_at')
+    .eq('phone_number_id', phone.id)
+    .order('last_inbound_at', { ascending: false, nullsFirst: false });
+  if (error) throw error;
+
+  const JANELA_MS = 24 * 60 * 60 * 1000;
+  const agora = Date.now();
+  const chats = (data ?? []).map((c) => {
+    const ultimo = c.last_inbound_at ? new Date(c.last_inbound_at as string).getTime() : null;
+    const aberta = ultimo !== null && agora - ultimo < JANELA_MS;
+    return {
+      wa_id: c.wa_id,
+      nome: c.profile_name,
+      ultima_entrada: c.last_inbound_at,
+      ultima_saida: c.last_outbound_at,
+      janela: {
+        aberta,
+        fecha_em: aberta ? new Date(ultimo! + JANELA_MS).toISOString() : null,
+      },
+    };
+  });
+  return { chats };
+}
+
 export async function urlDaMidia(db: SupabaseClient, messageId: string | null) {
   if (!messageId) throw new Error('contrato: parâmetro id é obrigatório');
   const { data, error } = await db.schema('waba').from('messages')
