@@ -14,7 +14,7 @@
 import { serviceClient } from '../_shared/supabase.ts';
 import { errorMessage, json } from '../_shared/http.ts';
 import { igualSeguro } from '../_shared/tempo_constante.ts';
-import { enviarViaOutbox, listarChats, listarMensagens, subirMidia, urlDaMidia } from '../_shared/waba_relay_core.ts';
+import { enviarViaOutbox, listarChats, listarMensagens, listarTemplates, submeterTemplate, subirMidia, urlDaMidia } from '../_shared/waba_relay_core.ts';
 
 Deno.serve(async (req) => {
   const segredo = Deno.env.get('WABA_RELAY_SECRET');
@@ -38,6 +38,12 @@ Deno.serve(async (req) => {
     }
     if (req.method === 'GET' && rota === 'chats') {
       return json(await listarChats(db, url.searchParams));
+    }
+    if (req.method === 'GET' && rota === 'templates') {
+      return json(await listarTemplates(db, url.searchParams));
+    }
+    if (req.method === 'POST' && rota === 'templates') {
+      return json(await submeterTemplate(db, await req.json()));
     }
     if (req.method === 'GET' && rota === 'media') {
       return json(await urlDaMidia(db, url.searchParams.get('id')));

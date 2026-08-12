@@ -187,6 +187,114 @@ export async function listarChats(db: SupabaseClient, params: URLSearchParams) {
   return { chats };
 }
 
+/** Templates Meta da conta do número: o painel lista (status inclusive) e envia os APPROVED. */
+export async function listarTemplates(db: SupabaseClient, params: URLSearchParams) {
+  const metaPhone = params.get('phone');
+  if (!metaPhone) throw new Error('contrato: parâmetro phone (meta_phone_number_id) é obrigatório');
+
+  const { data: phone, error: erroPhone } = await db.schema('waba').from('phone_numbers')
+    .select('account_id').eq('meta_phone_number_id', metaPhone).maybeSingle();
+  if (erroPhone) throw erroPhone;
+  if (!phone?.account_id) throw new Error(`contrato: número ${metaPhone} não está no registry`);
+
+  const { data, error } = await db.schema('waba').from('templates')
+    .select('id, name, language, category, status, rejected_reason, components, synced_at')
+    .eq('account_id', phone.account_id)
+    .order('name');
+  if (error) throw error;
+
+  return {
+    templates: (data ?? []).map((t) => ({
+      id: t.id,
+      nome: t.name,
+      idioma: t.language,
+      categoria: t.category,
+      status: t.status,
+      motivo_rejeicao: t.rejected_reason,
+      componentes: t.components,
+      sincronizado_em: t.synced_at,
+    })),
+  };
+}
+
+export type PedidoTemplate = {
+  phone?: string;
+  nome?: string;
+  idioma?: string;
+  categoria?: string;
+  corpo?: string;
+  rodape?: string;
+  exemplo?: string[];
+};
+
+/**
+ * Submete um template novo à Meta (fica PENDING até a análise) e registra a
+ * linha local. O painel acompanha o status pelo GET /templates (o sync da
+ * waba-templates atualiza; a Meta também manda webhook de status de template).
+ */
+export async function submeterTemplate(db: SupabaseClient, pedido: PedidoTemplate) {
+  if (!pedido.phone || !pedido.nome?.trim() || !pedido.corpo?.trim()) {
+    throw new Error('contrato: phone, nome e corpo são obrigatórios');
+  }
+  const nome = pedido.nome.trim().toLowerCase();
+  if (!/^[a-z0-9_]{1,512}$/.test(nome)) {
+    throw new Error('contrato: nome de template só aceita minúsculas, números e underscore');
+  }
+  const categoria = (pedido.categoria ?? 'UTILITY').toUpperCase();
+  if (!['UTILITY', 'MARKETING', 'AUTHENTICATION'].includes(categoria)) {
+    throw new Error('contrato: categoria deve ser UTILITY, MARKETING ou AUTHENTICATION');
+  }
+  const idioma = pedido.idioma ?? 'pt_BR';
+
+  const { data: phone, error: erroPhone } = await db.schema('waba').from('phone_numbers')
+    .select('account_id').eq('meta_phone_number_id', pedido.phone).maybeSingle();
+  if (erroPhone) throw erroPhone;
+  if (!phone?.account_id) throw new Error(`contrato: número ${pedido.phone} não está no registry`);
+
+  const { data: conta, error: erroConta } = await db.schema('waba').from('accounts')
+    .select('meta_waba_id').eq('id', phone.account_id).maybeSingle();
+  if (erroConta) throw erroConta;
+  const { data: cred, error: erroCred } = await db.schema('waba').from('credentials')
+    .select('token_secret_ref').eq('account_id', phone.account_id).maybeSingle();
+  if (erroCred) throw erroCred;
+  const token = Deno.env.get((cred?.token_secret_ref as string) ?? '');
+  if (!conta?.meta_waba_id || !token) throw new Error('conta sem WABA id ou token configurado');
+
+  const components: Record<string, unknown>[] = [{
+    type: 'BODY',
+    text: pedido.corpo,
+    // A Meta exige exemplo quando o corpo tem variáveis {{n}}.
+    ...(pedido.exemplo?.length ? { example: { body_text: [pedido.exemplo] } } : {}),
+  }];
+  if (pedido.rodape?.trim()) components.push({ type: 'FOOTER', text: pedido.rodape.trim() });
+
+  const graphVersion = Deno.env.get('GRAPH_VERSION') ?? 'v21.0';
+  const res = await fetch(`https://graph.facebook.com/${graphVersion}/${conta.meta_waba_id}/message_templates`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: nome, language: idioma, category: categoria, components }),
+  });
+  const corpo = await res.json() as { id?: string; status?: string; error?: { message?: string; error_user_msg?: string } };
+  if (!res.ok) {
+    // O motivo da Meta volta legível pro formulário do painel.
+    throw new Error(`contrato: Meta recusou o template — ${corpo.error?.error_user_msg ?? corpo.error?.message ?? res.status}`);
+  }
+
+  const { error: erroInsert } = await db.schema('waba').from('templates').upsert({
+    account_id: phone.account_id,
+    meta_template_id: corpo.id ?? null,
+    name: nome,
+    language: idioma,
+    category: categoria,
+    status: corpo.status ?? 'PENDING',
+    components: { components },
+    synced_at: new Date().toISOString(),
+  }, { onConflict: 'meta_template_id' });
+  if (erroInsert) throw erroInsert;
+
+  return { nome, idioma, categoria, status: corpo.status ?? 'PENDING', meta_template_id: corpo.id ?? null };
+}
+
 export async function urlDaMidia(db: SupabaseClient, messageId: string | null) {
   if (!messageId) throw new Error('contrato: parâmetro id é obrigatório');
   const { data, error } = await db.schema('waba').from('messages')

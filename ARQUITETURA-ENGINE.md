@@ -83,3 +83,21 @@ Detalhes de deploy que valem ouro:
 - Guards do repo que um engine novo obrigatoriamente toca: enum de
   ENGINE_TYPE em env.validation, allowlist EXPECTED_PUBLIC_CONTROLLERS +
   PUBLIC_PATHS (swagger.config e spec). A capability matrix NÃO se toca.
+
+## FASE 4 (12/08, noite): 5112 mudo + templates Meta no painel
+
+1. **Respostas automáticas do 5112 mortas**: a WABA do cerebro tem DOIS apps
+   Meta inscritos — o novo (waba-webhook) e o antigo (cerebro-webhook, gateway
+   v44 com gatekeeper). O gate `NUMEROS_MUDOS` no cerebro-webhook silencia o
+   5112 (sem resposta/reação/visto azul; entrada segue logada). Magic words
+   morrem nesse número; escolha/jijiflix estavam dormentes.
+2. **Templates**: relay `GET/POST /templates` (lista da conta; submissão à
+   Meta via Graph com `error_user_msg` legível) → adapter
+   `listTemplates/submitTemplate/sendTemplate` → rotas autenticadas
+   `/api/waba-relay/sessions/:id/{templates,send-template}` → modal
+   "Templates WABA" no Chats (enviar aprovado com variáveis {{n}} + submeter
+   novo). Commit `67bd04a8`, deployado e testado (17 templates, 17 APPROVED
+   listados pela cadeia inteira).
+3. **Gotcha de restart**: sem `NODE_ID` estável, o recreate do container é um
+   "nó novo" que espera o lease do anterior — auto-start parece morto.
+   `NODE_ID=cerebro-openwa` no .env resolve.
