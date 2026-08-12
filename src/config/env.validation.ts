@@ -68,7 +68,7 @@ export function validateEnv(config: EnvConfig): EnvConfig {
       errors.push(`${key} must be one of ${allowed.map(v => `"${v}"`).join(', ')} (got "${value}")`);
     }
   };
-  checkEnum('ENGINE_TYPE', ['whatsapp-web.js', 'baileys']);
+  checkEnum('ENGINE_TYPE', ['whatsapp-web.js', 'baileys', 'waba-relay']);
   checkEnum('STORAGE_TYPE', ['local', 's3']);
   // Every production hardening in the repo gates on the exact string 'production', so an
   // unrecognised value silently selects the permissive branch of each one — CORS, Swagger, DTO

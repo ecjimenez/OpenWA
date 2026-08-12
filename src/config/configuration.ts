@@ -212,6 +212,18 @@ export default () => ({
     baileys: {
       authDir: process.env.BAILEYS_AUTH_DIR || './data/baileys',
     },
+    // WABA Relay engine (per-session engine 'waba-relay'). The gateway never holds a Meta token:
+    // it talks only to an external relay hub, and the hub push into the gateway is verified with
+    // pushSecret (see modules/waba-relay-ingress). Read by the plugin from the opaque blob.
+    wabaRelay: {
+      hubUrl: process.env.WABA_RELAY_URL,
+      hubSecret: process.env.WABA_RELAY_SECRET,
+      pushSecret: process.env.OPENWA_PUSH_SECRET,
+      phone: process.env.WABA_RELAY_PHONE,
+      displayPhone: process.env.WABA_RELAY_DISPLAY_PHONE,
+      pushName: process.env.WABA_RELAY_PUSH_NAME,
+      dataDir: process.env.WABA_RELAY_DATA_DIR || './data/waba-relay',
+    },
   },
 
   sessions: {

@@ -125,16 +125,27 @@ export function Sessions() {
     dismissQrForSession,
   } = useSessionPairing({ sessions, sessionsRef, reloadSessions: fetchSessions });
 
-  const { showCreateModal, setShowCreateModal, newSessionName, setNewSessionName, creating, handleCreate } =
-    useSessionCreateForm({
-      onCreated: newSession => {
-        // Functional append: never capture a stale `sessions` (a WS or fetch between the await and the
-        // setState would otherwise drop a row). Then invalidate the prefix so stats/groups/chats refresh.
-        setSessions(current => [...current, newSession]);
-        void invalidateSessionQueries(queryClient, queryKeys.sessions);
-      },
-      onFailed: msg => setError(msg),
-    });
+  const {
+    showCreateModal,
+    setShowCreateModal,
+    newSessionName,
+    setNewSessionName,
+    availableEngines,
+    selectedEngine,
+    setSelectedEngine,
+    enginesLoading,
+    engineSelectionAvailable,
+    creating,
+    handleCreate,
+  } = useSessionCreateForm({
+    onCreated: newSession => {
+      // Functional append: never capture a stale `sessions` (a WS or fetch between the await and the
+      // setState would otherwise drop a row). Then invalidate the prefix so stats/groups/chats refresh.
+      setSessions(current => [...current, newSession]);
+      void invalidateSessionQueries(queryClient, queryKeys.sessions);
+    },
+    onFailed: msg => setError(msg),
+  });
 
   // Reconcile the LOCAL view with an authoritative Session response. The previous handlers discarded
   // the response and fabricated `{ status: 'disconnected' }`, losing phone:null, timestamps, and other
@@ -459,7 +470,7 @@ export function Sessions() {
               <button
                 className="btn-primary"
                 onClick={handleCreate}
-                disabled={creating || !canCreateSession(newSessionName, existingSessionNames)}
+                disabled={creating || enginesLoading || !canCreateSession(newSessionName, existingSessionNames)}
               >
                 {creating ? <Loader2 className="animate-spin" size={16} /> : t('common.create')}
               </button>
@@ -480,6 +491,22 @@ export function Sessions() {
           <p className="input-hint">
             <Trans i18nKey="sessions.create.hint" components={{ code: <code /> }} />
           </p>
+          <label>{t('sessions.create.engineLabel')}</label>
+          {enginesLoading ? (
+            <p className="input-hint">{t('sessions.create.engineLoading')}</p>
+          ) : engineSelectionAvailable ? (
+            <>
+              <CustomSelect
+                value={selectedEngine}
+                onChange={setSelectedEngine}
+                options={availableEngines.map(engine => ({ value: engine.id, label: engine.name }))}
+                ariaLabel={t('sessions.create.engineLabel')}
+              />
+              <p className="input-hint">{t('sessions.create.engineHint')}</p>
+            </>
+          ) : (
+            <p className="input-hint">{t('sessions.create.engineUnavailable')}</p>
+          )}
           {nameIssues.includes('format') && <p className="input-error">{t('sessions.create.invalidChars')}</p>}
           {nameIssues.includes('too-long') && (
             <p className="input-error">{t('sessions.create.tooLong', { length: newSessionName.length })}</p>

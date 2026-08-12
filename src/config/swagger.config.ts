@@ -23,6 +23,9 @@ export const PUBLIC_PATHS = [
   '/api/health/ready',
   '/api/infra/health',
   '/api/ingress/{pluginId}/{instanceId}/{path}',
+  // waba-relay hub push: authenticity comes from the HMAC body signature
+  // (x-hub-signature-256), not from an API key — same trust model as /ingress.
+  '/api/waba-relay/ingress',
 ];
 
 const HTTP_METHODS = ['get', 'post', 'put', 'delete', 'patch', 'options', 'head', 'trace', 'search'] as const;

@@ -103,6 +103,8 @@ describe('PUBLIC_PATHS drift guard', () => {
     'src/modules/infra/infra-status.controller.ts',
     'src/modules/integration/ingress.controller.ts',
     'src/modules/metrics/metrics.controller.ts',
+    // Hub push of the waba-relay engine — HMAC-signed body instead of API key.
+    'src/modules/waba-relay-ingress/waba-relay-ingress.controller.ts',
   ];
 
   function listTsFiles(dir: string, out: string[] = []): string[] {
@@ -141,6 +143,7 @@ describe('PUBLIC_PATHS drift guard', () => {
         '/api/health/ready',
         '/api/infra/health',
         '/api/ingress/{pluginId}/{instanceId}/{path}',
+        '/api/waba-relay/ingress',
       ].sort(),
     );
   });

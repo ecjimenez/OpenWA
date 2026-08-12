@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { sessionApi, type Session } from '../services/api';
+import { pluginsApi, sessionApi, type Engine, type Session } from '../services/api';
 import { useToast } from './useToast';
 
 export interface UseSessionCreateFormArgs {
@@ -13,6 +13,11 @@ export interface SessionCreateForm {
   setShowCreateModal: (open: boolean) => void;
   newSessionName: string;
   setNewSessionName: (name: string) => void;
+  availableEngines: Engine[];
+  selectedEngine: string;
+  setSelectedEngine: (engine: string) => void;
+  enginesLoading: boolean;
+  engineSelectionAvailable: boolean;
   creating: boolean;
   handleCreate: () => Promise<void>;
 }
@@ -29,13 +34,59 @@ export function useSessionCreateForm({ onCreated, onFailed }: UseSessionCreateFo
   const toast = useToast();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newSessionName, setNewSessionName] = useState('');
+  const [availableEngines, setAvailableEngines] = useState<Engine[]>([]);
+  const [selectedEngine, setSelectedEngineState] = useState('');
+  const [enginesLoading, setEnginesLoading] = useState(false);
+  const engineTouchedRef = useRef(false);
   const [creating, setCreating] = useState(false);
+
+  useEffect(() => {
+    if (!showCreateModal) {
+      engineTouchedRef.current = false;
+      return;
+    }
+
+    let cancelled = false;
+    setEnginesLoading(true);
+
+    Promise.allSettled([pluginsApi.getEngines(), pluginsApi.getCurrentEngine()])
+      .then(([enginesResult, currentResult]) => {
+        if (cancelled) return;
+        const enabledEngines = enginesResult.status === 'fulfilled' ? enginesResult.value.filter(engine => engine.enabled) : [];
+        setAvailableEngines(enabledEngines);
+
+        if (!engineTouchedRef.current) {
+          const fallbackEngine = enabledEngines[0]?.id ?? '';
+          const currentEngine = currentResult.status === 'fulfilled' ? currentResult.value.engineType : '';
+          const nextEngine = enabledEngines.some(engine => engine.id === currentEngine) ? currentEngine : fallbackEngine;
+          setSelectedEngineState(nextEngine);
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setAvailableEngines([]);
+        if (!engineTouchedRef.current) setSelectedEngineState('');
+      })
+      .finally(() => {
+        if (!cancelled) setEnginesLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [showCreateModal]);
+
+  const setSelectedEngine = (engine: string) => {
+    engineTouchedRef.current = true;
+    setSelectedEngineState(engine);
+  };
 
   const handleCreate = async () => {
     if (!newSessionName.trim()) return;
     try {
       setCreating(true);
-      const newSession = await sessionApi.create(newSessionName);
+      const engine = availableEngines.some(option => option.id === selectedEngine) ? selectedEngine : undefined;
+      const newSession = await sessionApi.create({ name: newSessionName, engine });
       setNewSessionName('');
       setShowCreateModal(false);
       toast.success(t('sessions.create.successTitle'), t('sessions.create.successDesc', { name: newSession.name }));
@@ -49,5 +100,17 @@ export function useSessionCreateForm({ onCreated, onFailed }: UseSessionCreateFo
     }
   };
 
-  return { showCreateModal, setShowCreateModal, newSessionName, setNewSessionName, creating, handleCreate };
+  return {
+    showCreateModal,
+    setShowCreateModal,
+    newSessionName,
+    setNewSessionName,
+    availableEngines,
+    selectedEngine,
+    setSelectedEngine,
+    enginesLoading,
+    engineSelectionAvailable: availableEngines.length > 0,
+    creating,
+    handleCreate,
+  };
 }

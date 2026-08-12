@@ -18,6 +18,20 @@ export class CreateSessionDto {
 
   @ApiPropertyOptional({
     description:
+      'Optional engine override for this session. When omitted, the gateway uses the global engine ' +
+      'configured for the deployment.',
+    example: 'baileys',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  @Matches(/^[a-z0-9-]+$/, {
+    message: 'engine can only contain lowercase letters, numbers, and hyphens',
+  })
+  engine?: string;
+
+  @ApiPropertyOptional({
+    description:
       'Session configuration. Only three keys are read: autoRejectCalls (boolean, default false) ' +
       'rejects incoming calls as soon as they ring — the call.received event is still emitted ' +
       'first; maxReconnectAttempts (0-20, default unlimited) caps consecutive reconnects; and ' +

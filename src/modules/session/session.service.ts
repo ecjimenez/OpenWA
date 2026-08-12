@@ -27,6 +27,7 @@ import { resolveFeatureFlags } from '../../config/feature-flags';
 import { IWhatsAppEngine, ChatSummary, ChatState } from '../../engine/interfaces/whatsapp-engine.interface';
 import { createLogger } from '../../common/services/logger.service';
 import { HookManager } from '../../core/hooks';
+import { EngineFactory } from '../../engine/engine.factory';
 
 // Re-exported so the existing spec import paths keep working after these moved out.
 export { clampReconnectDelay } from './reconnect-policy';
@@ -78,6 +79,7 @@ export class SessionService implements OnModuleDestroy, OnModuleInit, OnApplicat
     private readonly presence: PresenceStore,
     private readonly hookManager: HookManager,
     private readonly engineLifecycle: SessionEngineLifecycle,
+    private readonly engineFactory: EngineFactory,
     @Optional()
     private readonly configService?: ConfigService,
     // Trailing @Optional, like configService: the running app always provides it, while the
@@ -229,6 +231,15 @@ export class SessionService implements OnModuleDestroy, OnModuleInit, OnApplicat
   }
 
   async create(dto: CreateSessionDto): Promise<Session> {
+    if (dto.engine) {
+      const availableEngines = new Set(this.engineFactory.getAvailableEngines().map(engine => engine.id));
+      if (!availableEngines.has(dto.engine)) {
+        throw new BadRequestException(
+          `Unsupported engine '${dto.engine}'. Available engines: ${Array.from(availableEngines).join(', ') || 'none'}`,
+        );
+      }
+    }
+
     // Check if session with same name exists
     const existing = await this.sessionRepository.findOne({
       where: { name: dto.name },
@@ -240,6 +251,7 @@ export class SessionService implements OnModuleDestroy, OnModuleInit, OnApplicat
 
     const session = this.sessionRepository.create({
       name: dto.name,
+      engine: dto.engine || null,
       config: dto.config || {},
       proxyUrl: dto.proxyUrl || null,
       proxyType: dto.proxyType || null,

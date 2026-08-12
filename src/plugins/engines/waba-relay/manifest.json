@@ -1,0 +1,31 @@
+{
+    "id": "waba-relay",
+    "name": "WABA Relay Engine",
+    "version": "1.0.0",
+    "type": "engine",
+    "description": "WhatsApp Business Cloud API engine via external HTTP relay hub — the gateway never holds a Meta token",
+    "author": "OpenWA Team",
+    "main": "index.ts",
+    "provides": ["whatsapp-engine", "text-messages", "media-messages"],
+    "configSchema": {
+        "type": "object",
+        "properties": {
+            "hubUrl": {
+                "type": "string",
+                "title": "Relay Hub URL",
+                "description": "Base URL of the relay hub that owns the Meta credentials"
+            },
+            "phone": {
+                "type": "string",
+                "title": "Cloud API phone_number_id",
+                "description": "Meta phone_number_id this session speaks for"
+            },
+            "dataDir": {
+                "type": "string",
+                "title": "Data Directory",
+                "description": "Directory for the persisted backlog cursor",
+                "default": "./data/waba-relay"
+            }
+        }
+    }
+}

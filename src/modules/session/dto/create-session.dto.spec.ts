@@ -34,3 +34,16 @@ describe('CreateSessionDto proxyUrl validation', () => {
     expect(validateSync(plainToInstance(CreateSessionDto, { name: 'my-bot' }))).toHaveLength(0);
   });
 });
+
+describe('CreateSessionDto engine validation', () => {
+  const errs = (engine: unknown): ReturnType<typeof validateSync> =>
+    validateSync(plainToInstance(CreateSessionDto, { name: 'my-bot', engine }));
+
+  it.each(['whatsapp-web-js', 'baileys', 'waba-relay'])('accepts a valid engine id: %s', engine => {
+    expect(errs(engine)).toHaveLength(0);
+  });
+
+  it.each(['Baileys', 'waba_relay', 'waba relay', '../relay'])('rejects an invalid engine id: %s', engine => {
+    expect(errs(engine).length).toBeGreaterThan(0);
+  });
+});

@@ -68,6 +68,11 @@ export interface Session {
   restriction?: AccountRestriction | null;
 }
 
+export interface CreateSessionInput {
+  name: string;
+  engine?: string;
+}
+
 /** One participant's presence within a chat. */
 export interface ParticipantPresence {
   id: string;
@@ -716,10 +721,10 @@ async function requestBlob(endpoint: string): Promise<Blob> {
 export const sessionApi = {
   list: () => request<Session[]>('/sessions'),
   get: (id: string) => request<Session>(`/sessions/${id}`),
-  create: (name: string) =>
+  create: ({ name, engine }: CreateSessionInput) =>
     request<Session>('/sessions', {
       method: 'POST',
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, engine }),
     }),
   delete: (id: string) => request<void>(`/sessions/${id}`, { method: 'DELETE' }),
   getConfig: (id: string) => request<SessionConfig>(`/sessions/${id}/config`),

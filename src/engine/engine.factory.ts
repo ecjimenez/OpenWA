@@ -17,6 +17,8 @@ export interface EngineCreateOptions {
   sessionId: string;
   /** Session UUID (Session.id) — the DB-row key for FK-bound stores (e.g. baileys_stored_messages). */
   dbSessionId: string;
+  /** Optional per-session engine override. Falls back to the globally configured engine when absent. */
+  engine?: string;
   proxyUrl?: string;
   proxyType?: 'http' | 'https' | 'socks4' | 'socks5';
 }
@@ -78,6 +80,28 @@ export class EngineFactory implements OnModuleInit {
       engineConfig,
     );
 
+    const wabaRelayPluginDir = path.join(__dirname, '..', 'plugins', 'engines', 'waba-relay');
+    if (fs.existsSync(wabaRelayPluginDir)) {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { WabaRelayPlugin } = require('../plugins/engines/waba-relay') as {
+        WabaRelayPlugin: new (...args: unknown[]) => IEnginePlugin;
+      };
+      const wabaRelayManifest: PluginManifest = {
+        id: 'waba-relay',
+        name: 'WABA Relay Engine',
+        version: '1.0.0',
+        type: PluginType.ENGINE,
+        description: 'External HTTP relay engine for WhatsApp Business API sessions',
+        main: 'index.ts',
+        provides: ['whatsapp-engine'],
+      };
+      this.pluginLoader.registerBuiltInPlugin(
+        wabaRelayManifest,
+        new WabaRelayPlugin(engineConfig, this.lidMappingStore),
+        engineConfig,
+      );
+    }
+
     // Auto-enable the configured engine
     try {
       await this.pluginLoader.enablePlugin(this.engineType);
@@ -104,7 +128,8 @@ export class EngineFactory implements OnModuleInit {
     }
 
     // Try to get engine from plugin system
-    const enginePlugin = this.pluginLoader.getPlugin(this.engineType);
+    const requestedEngine = options.engine ?? this.engineType;
+    const enginePlugin = this.pluginLoader.getPlugin(requestedEngine);
 
     if (enginePlugin?.instance && this.isEnginePlugin(enginePlugin.instance)) {
       // Engine-neutral per-call config only. Engine-specific config (e.g. Puppeteer for
@@ -119,11 +144,12 @@ export class EngineFactory implements OnModuleInit {
     }
 
     // Fallback to direct adapter creation (legacy support)
-    this.logger.warn(`Engine plugin ${this.engineType} not available, using fallback`, {
+    this.logger.warn(`Engine plugin ${requestedEngine} not available, using fallback`, {
       action: 'engine_fallback',
+      engineType: requestedEngine,
     });
 
-    return this.createFallbackEngine(options);
+    return this.createFallbackEngine(options, requestedEngine);
   }
 
   /**
@@ -205,13 +231,13 @@ export class EngineFactory implements OnModuleInit {
     );
   }
 
-  private createFallbackEngine(options: EngineCreateOptions): IWhatsAppEngine {
+  private createFallbackEngine(options: EngineCreateOptions, requestedEngine: string): IWhatsAppEngine {
     // This legacy fallback can only construct the whatsapp-web.js adapter. If a different engine was
     // requested (e.g. ENGINE_TYPE=baileys) and its plugin wasn't available, building wwebjs here would
     // silently run the WRONG engine — fail loudly so the misconfiguration is visible instead.
-    if (this.engineType !== 'whatsapp-web.js') {
+    if (requestedEngine !== 'whatsapp-web.js') {
       throw new Error(
-        `Engine '${this.engineType}' is unavailable and has no direct fallback; cannot start the session.`,
+        `Engine '${requestedEngine}' is unavailable and has no direct fallback; cannot start the session.`,
       );
     }
 

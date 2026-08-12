@@ -15,6 +15,7 @@ describe('SessionController — create() response contract', () => {
   const entity: Session = {
     id: 'sess-uuid-1',
     name: 'test-session',
+    engine: 'baileys',
     status: SessionStatus.CREATED,
     phone: null,
     pushName: null,
@@ -61,6 +62,7 @@ describe('SessionController — create() response contract', () => {
     expect(result).toEqual({
       id: entity.id,
       name: entity.name,
+      engine: entity.engine,
       status: entity.status,
       phone: entity.phone,
       pushName: entity.pushName,
@@ -102,6 +104,7 @@ describe('SessionController — logout() audit + error forwarding contract', () 
   const loggedOutEntity: Session = {
     id: 'sess-uuid-1',
     name: 'test-session',
+    engine: null,
     status: SessionStatus.DISCONNECTED,
     phone: null,
     pushName: null,

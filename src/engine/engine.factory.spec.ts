@@ -68,6 +68,26 @@ describe('EngineFactory', () => {
     });
   });
 
+  it('uses the per-session engine override instead of the global engine selection', () => {
+    const baileysCreateEngine = jest.fn().mockReturnValue({});
+    const pluginLoader = {
+      getPlugin: jest.fn((engineId: string) =>
+        engineId === 'baileys' ? { instance: { type: PluginType.ENGINE, createEngine: baileysCreateEngine } } : undefined,
+      ),
+    } as unknown as PluginLoaderService;
+
+    const factory = new EngineFactory(buildConfigService({ 'engine.type': 'whatsapp-web.js' }), pluginLoader, buildMessageStore(), buildLidStore());
+    factory.create({ sessionId: 'sess-override', dbSessionId: 'db-override', engine: 'baileys' });
+
+    expect(pluginLoader.getPlugin).toHaveBeenCalledWith('baileys');
+    expect(baileysCreateEngine).toHaveBeenCalledWith({
+      sessionId: 'sess-override',
+      dbSessionId: 'db-override',
+      proxyUrl: undefined,
+      proxyType: undefined,
+    });
+  });
+
   it('registers the built-in engine with the opaque engine config blob (#219 guarantee moves to context.config)', async () => {
     const registerBuiltInPlugin = jest.fn();
     const pluginLoader = {

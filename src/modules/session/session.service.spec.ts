@@ -60,6 +60,7 @@ function createMockSession(overrides: Partial<Session> = {}): Session {
   return {
     id: 'sess-uuid-1',
     name: 'test-session',
+    engine: null,
     status: SessionStatus.CREATED,
     phone: null,
     pushName: null,
@@ -161,6 +162,10 @@ describe('SessionService', () => {
 
     engineFactory = {
       create: jest.fn().mockReturnValue(mockEngine),
+      getAvailableEngines: jest.fn().mockReturnValue([
+        { id: 'whatsapp-web.js', name: 'WhatsApp Web.js Engine', enabled: true, features: [] },
+        { id: 'baileys', name: 'Baileys Engine', enabled: true, features: [] },
+      ]),
       purgeSessionData: jest.fn().mockResolvedValue(undefined),
     };
 
@@ -673,10 +678,37 @@ describe('SessionService', () => {
       );
     });
 
+    it('persists a per-session engine override when provided', async () => {
+      const session = createMockSession({ engine: 'baileys' });
+      (repository.findOne as jest.Mock).mockResolvedValue(null);
+      (repository.create as jest.Mock).mockReturnValue(session);
+      (repository.save as jest.Mock).mockResolvedValue(session);
+
+      const result = await service.create({ name: 'test-session', engine: 'baileys' });
+
+      expect(result.engine).toBe('baileys');
+      expect(repository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'test-session',
+          engine: 'baileys',
+          status: SessionStatus.CREATED,
+        }),
+      );
+    });
+
     it('should throw ConflictException if session name already exists', async () => {
       (repository.findOne as jest.Mock).mockResolvedValue(createMockSession());
 
       await expect(service.create({ name: 'test-session' })).rejects.toThrow(ConflictException);
+    });
+
+    it('rejects an unknown per-session engine override', async () => {
+      await expect(service.create({ name: 'test-session', engine: 'not-an-engine' })).rejects.toThrow(
+        BadRequestException,
+      );
+
+      expect(repository.findOne).not.toHaveBeenCalled();
+      expect(repository.create).not.toHaveBeenCalled();
     });
 
     it('maps a name UNIQUE-violation on insert to 409 when two concurrent creates race past the pre-check', async () => {
@@ -967,6 +999,22 @@ describe('SessionService', () => {
       expect(repository.update).toHaveBeenCalledWith('sess-uuid-1', {
         status: SessionStatus.INITIALIZING,
       });
+    });
+
+    it('passes the session engine override into EngineFactory.create()', async () => {
+      const session = createMockSession({ engine: 'baileys' });
+      (repository.findOne as jest.Mock).mockResolvedValue(session);
+      (repository.update as jest.Mock).mockResolvedValue({ affected: 1 });
+
+      await service.start('sess-uuid-1');
+
+      expect(engineFactory.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sessionId: 'test-session',
+          dbSessionId: 'sess-uuid-1',
+          engine: 'baileys',
+        }),
+      );
     });
 
     it('should throw BadRequestException if session already started', async () => {

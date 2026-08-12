@@ -41,6 +41,16 @@ export class SessionResponseDto {
   @ApiProperty({ example: 'my-bot' })
   name!: string;
 
+  @ApiPropertyOptional({
+    type: String,
+    description:
+      'Session-specific engine override. Null means this session follows the global engine configured ' +
+      'for the deployment.',
+    example: 'waba-relay',
+    nullable: true,
+  })
+  engine?: string | null;
+
   @ApiProperty({ enum: SessionStatus, example: SessionStatus.READY })
   status!: SessionStatus;
 
@@ -108,6 +118,7 @@ export class SessionResponseDto {
     return {
       id: session.id,
       name: session.name,
+      engine: session.engine,
       status: session.status,
       phone: session.phone,
       pushName: session.pushName,

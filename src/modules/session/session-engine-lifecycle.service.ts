@@ -540,6 +540,7 @@ export class SessionEngineLifecycle {
     const engine = this.engineFactory.create({
       sessionId: session.name,
       dbSessionId: id,
+      engine: session.engine || undefined,
       proxyUrl: session.proxyUrl || undefined,
       proxyType: session.proxyType || undefined,
     });

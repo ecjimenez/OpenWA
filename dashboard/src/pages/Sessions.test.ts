@@ -16,7 +16,7 @@ import { test, before, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { createElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { Session } from '../services/api';
+import type { Engine, Session } from '../services/api';
 import type { installJsdomGlobals as installJsdomGlobalsFn } from '../test-helpers/jsdom.ts';
 
 // ── Fixtures + fetch stub ────────────────────────────────────────────────────
@@ -60,6 +60,10 @@ const SESSION_TIMELOCKED: Session = {
 };
 
 const SESSIONS = [SESSION_QR, SESSION_STALE_ENGINE, SESSION_TIMELOCKED];
+const AVAILABLE_ENGINES: Engine[] = [
+  { id: 'baileys', name: 'Baileys', enabled: true, features: [] },
+  { id: 'whatsapp-web.js', name: 'WhatsApp Web.js', enabled: true, features: [] },
+];
 
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -91,6 +95,7 @@ function findFetchCall(method: string, path: string): FetchCall | undefined {
 // Mutable so a test can set the starting value and observe what a PATCH wrote back.
 let sessionConfig = { autoRejectCalls: false, maxReconnectAttempts: null as number | null, reconnectBaseDelay: 5000 };
 let configPatchFails = false;
+let currentEngineFetchFails = false;
 
 function installFetchStub(): void {
   globalThis.fetch = (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
@@ -109,6 +114,12 @@ function installFetchStub(): void {
     fetchCalls.push({ method, path, body });
 
     if (method === 'GET' && path === '/api/sessions') return Promise.resolve(jsonResponse(SESSIONS));
+
+    if (method === 'GET' && path === '/api/infra/engines') return Promise.resolve(jsonResponse(AVAILABLE_ENGINES));
+    if (method === 'GET' && path === '/api/infra/engines/current') {
+      if (currentEngineFetchFails) return Promise.resolve(jsonResponse({ message: 'no current engine' }, 500));
+      return Promise.resolve(jsonResponse({ engineType: 'baileys' }));
+    }
 
     if (method === 'POST' && path === '/api/sessions') {
       const name = (body as { name?: string } | undefined)?.name ?? 'unnamed';
@@ -207,6 +218,7 @@ afterEach(() => {
   rtl.cleanup();
   queryClient?.clear();
   queryClient = undefined;
+  currentEngineFetchFails = false;
 });
 
 function renderSessions(): { container: HTMLElement } {
@@ -243,7 +255,7 @@ test('the session list renders, and action buttons gate on engineLoaded rather t
   within(qrCard).getByRole('button', { name: 'Show QR' });
 });
 
-test('creating a session issues POST /api/sessions with the entered name', async () => {
+test('creating a session sends the selected engine, seeded from the current global engine', async () => {
   const { screen, fireEvent, waitFor, within } = rtl;
   resetFetchCalls();
   renderSessions();
@@ -252,6 +264,14 @@ test('creating a session issues POST /api/sessions with the entered name', async
   fireEvent.click(screen.getByRole('button', { name: 'New Session' }));
 
   const dialog = await screen.findByRole('dialog');
+  await waitFor(() => {
+    assert.ok(findFetchCall('GET', '/api/infra/engines'));
+    assert.ok(findFetchCall('GET', '/api/infra/engines/current'));
+  });
+
+  const engineTrigger = await within(dialog).findByRole('button', { name: 'Engine' });
+  fireEvent.click(engineTrigger);
+  fireEvent.click(within(dialog).getByRole('option', { name: 'WhatsApp Web.js' }));
   fireEvent.change(within(dialog).getByPlaceholderText('e.g., marketing-bot'), { target: { value: 'backup-bot' } });
   fireEvent.click(within(dialog).getByRole('button', { name: 'Create' }));
 
@@ -259,10 +279,31 @@ test('creating a session issues POST /api/sessions with the entered name', async
   await waitFor(() => {
     const call = findFetchCall('POST', '/api/sessions');
     assert.ok(call, 'expected a POST to /sessions');
-    assert.deepEqual(call!.body, { name: 'backup-bot' });
+    assert.deepEqual(call!.body, { name: 'backup-bot', engine: 'whatsapp-web.js' });
   });
 
   await screen.findByText('backup-bot');
+});
+
+test('creating a session falls back to the first available engine when current-engine discovery fails', async () => {
+  const { screen, fireEvent, waitFor, within } = rtl;
+  resetFetchCalls();
+  currentEngineFetchFails = true;
+  renderSessions();
+
+  await screen.findByText('new-device');
+  fireEvent.click(screen.getByRole('button', { name: 'New Session' }));
+
+  const dialog = await screen.findByRole('dialog');
+  await within(dialog).findByRole('button', { name: 'Engine' });
+  fireEvent.change(within(dialog).getByPlaceholderText('e.g., marketing-bot'), { target: { value: 'fallback-bot' } });
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Create' }));
+
+  await waitFor(() => {
+    const call = findFetchCall('POST', '/api/sessions');
+    assert.ok(call, 'expected a POST to /sessions');
+    assert.deepEqual(call!.body, { name: 'fallback-bot', engine: 'baileys' });
+  });
 });
 
 test('a typed pairing phone number survives toggling to the QR tab and back', async () => {
