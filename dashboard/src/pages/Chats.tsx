@@ -48,6 +48,7 @@ import ChatThread from '../components/chats/ChatThread';
 import ChatComposer, { type StagedAttachment } from '../components/chats/ChatComposer';
 import StatusMedia from '../components/chats/StatusMedia';
 import StatusComposeModal from '../components/chats/StatusComposeModal';
+import WabaTemplatesModal from '../components/chats/WabaTemplatesModal';
 import './Chats.css';
 
 // Quiet window for coalescing mark-as-read RPCs (see markReadCoalescer below).
@@ -113,6 +114,8 @@ export function Chats() {
   // Sessions list & active session
   const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<string>('');
+  // Modal de templates Meta — só existe em sessão waba-relay.
+  const [wabaTemplatesOpen, setWabaTemplatesOpen] = useState(false);
   const [loadingSessions, setLoadingSessions] = useState<boolean>(true);
 
   // Chats list
@@ -916,6 +919,16 @@ export function Chats() {
                   onDelete={handleDeleteMessage}
                 />
 
+                {/* Sessão WABA (engine waba-relay): templates Meta são o único caminho
+                    de saída com a janela de 24h fechada — o botão vive junto do composer. */}
+                {sessions.find(s => s.id === selectedSessionId)?.engine === 'waba-relay' && (
+                  <div className="waba-templates-bar">
+                    <button type="button" className="btn-secondary" onClick={() => setWabaTemplatesOpen(true)}>
+                      Templates WABA
+                    </button>
+                  </div>
+                )}
+
                 {/* Composer: attachment preview, emoji panel, reply banner, input bar —
                     components/chats/ChatComposer. */}
                 <ChatComposer
@@ -1039,6 +1052,14 @@ export function Chats() {
         onClose={() => setLightboxIndex(null)}
         onNavigate={setLightboxIndex}
       />
+
+      {wabaTemplatesOpen && (
+        <WabaTemplatesModal
+          sessionId={selectedSessionId}
+          chatId={activeChat?.id ?? null}
+          onClose={() => setWabaTemplatesOpen(false)}
+        />
+      )}
 
       {composeOpen && (
         <StatusComposeModal

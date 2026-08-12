@@ -75,6 +75,26 @@ type HubSendResult = {
   message_id: string | null;
 };
 
+export type HubTemplate = {
+  id: string;
+  nome: string;
+  idioma: string;
+  categoria: string | null;
+  status: string | null;
+  motivo_rejeicao: string | null;
+  componentes: unknown;
+  sincronizado_em: string | null;
+};
+
+export type SubmitTemplateInput = {
+  nome: string;
+  idioma?: string;
+  categoria?: string;
+  corpo: string;
+  rodape?: string;
+  exemplo?: string[];
+};
+
 export type WabaRelayPushEvent = {
   evento: 'mensagem' | 'status' | 'media_ready';
   phone?: string | null;
@@ -280,6 +300,34 @@ export class WabaRelayAdapter implements IWhatsAppEngine {
 
   setOnlinePresence(): Promise<void> {
     return Promise.resolve();
+  }
+
+  // ── Meta templates (fora da IWhatsAppEngine — capacidade própria do relay) ─
+
+  async listTemplates(): Promise<HubTemplate[]> {
+    const data = (await this.hubGet('/templates')) as { templates: HubTemplate[] };
+    return data.templates ?? [];
+  }
+
+  async submitTemplate(input: SubmitTemplateInput): Promise<unknown> {
+    const res = await fetch(`${this.opts.hubUrl}/templates`, {
+      method: 'POST',
+      headers: { 'x-relay-secret': this.opts.hubSecret, 'content-type': 'application/json' },
+      body: JSON.stringify({ phone: this.opts.phone, ...input }),
+    });
+    const body = (await res.json()) as { error?: string };
+    // O motivo da recusa da Meta volta legível pro formulário do painel.
+    if (!res.ok) throw new Error(body.error ?? `hub POST /templates: ${res.status}`);
+    return body;
+  }
+
+  /** Envia template aprovado — o único caminho de saída com a janela de 24h fechada. */
+  async sendTemplate(chatId: string, nome: string, idioma?: string, components?: unknown[]): Promise<MessageResult> {
+    return this.hubSend({
+      tipo: 'template',
+      para: this.waIdOf(chatId),
+      template: { nome, idioma: idioma ?? 'pt_BR', ...(components?.length ? { components } : {}) },
+    });
   }
 
   // ── Hub client ────────────────────────────────────────────────────────

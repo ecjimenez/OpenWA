@@ -52,6 +52,8 @@ export interface Session {
    * Optional only because a dashboard can be served by a gateway that predates the field.
    */
   engineLoaded?: boolean;
+  /** Per-session engine override; null/absent = the deployment-wide engine. */
+  engine?: string | null;
   phone?: string | null;
   pushName?: string | null;
   lastActive?: string | null;
@@ -717,6 +719,36 @@ async function requestBlob(endpoint: string): Promise<Blob> {
 // =============================================================================
 // Session API
 // =============================================================================
+
+export interface WabaTemplate {
+  id: string;
+  nome: string;
+  idioma: string;
+  categoria: string | null;
+  status: string | null;
+  motivo_rejeicao: string | null;
+  componentes: unknown;
+  sincronizado_em: string | null;
+}
+
+// Templates Meta de sessões waba-relay (fork): listar, submeter à análise da
+// Meta e enviar template aprovado (único caminho com a janela de 24h fechada).
+export const wabaRelayApi = {
+  listTemplates: (sessionId: string) => request<WabaTemplate[]>(`/waba-relay/sessions/${sessionId}/templates`),
+  submitTemplate: (
+    sessionId: string,
+    body: { nome: string; idioma?: string; categoria?: string; corpo: string; rodape?: string; exemplo?: string[] },
+  ) =>
+    request<{ nome: string; status: string }>(`/waba-relay/sessions/${sessionId}/templates`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  sendTemplate: (sessionId: string, body: { chatId: string; nome: string; idioma?: string; components?: unknown[] }) =>
+    request<{ id: string; timestamp: number }>(`/waba-relay/sessions/${sessionId}/send-template`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+};
 
 export const sessionApi = {
   list: () => request<Session[]>('/sessions'),

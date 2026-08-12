@@ -514,3 +514,27 @@ code {
        changes width/anchoring. (Scrolling lives on .modal-body to avoid a double scrollbar.) */
   }
 }
+
+/* ── Templates WABA (sessões waba-relay) ─────────────────────────────── */
+.waba-templates-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 12px 0;
+}
+.waba-templates-modal .waba-template-preview {
+  background: var(--bg-secondary, rgba(0, 0, 0, 0.06));
+  border-radius: 8px;
+  padding: 10px 12px;
+  white-space: pre-wrap;
+  font-size: 0.9em;
+}
+.waba-templates-modal .waba-templates-feedback {
+  margin-top: 10px;
+  font-size: 0.9em;
+}
+.waba-templates-modal .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
