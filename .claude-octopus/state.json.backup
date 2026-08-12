@@ -11,6 +11,13 @@
       "rationale": "Li o repo antes de sintetizar. Isso muda o peso de várias afirmações.\n\n## Fato que precede tudo\n\n**O fork do OpenWA não está neste working directory.** `/Users/fields/Documents/conversinha-openwa` con",
       "date": "2026-08-12",
       "commit": "e7e3b68ebd0341a67bb0168759fa335c8698fbe7"
+    },
+    {
+      "phase": "validate_tangle_results",
+      "decision": "Quality gate FAILED: 50% success rate (threshold: 75%)",
+      "rationale": "Success: 1/2, failures: 1, threshold: 75%",
+      "date": "2026-08-12",
+      "commit": "cd5f2d2ae16567b847da21daf2fd063662788b56"
     }
   ],
   "blockers": [],
@@ -24,7 +31,7 @@
     "phases_completed": 0,
     "total_execution_time_minutes": 0,
     "provider_usage": {
-      "codex": 0,
+      "codex": 1,
       "gemini": 1,
       "perplexity": 0,
       "claude": 0

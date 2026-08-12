@@ -60,3 +60,26 @@ O clone `~/openwa` na cerebro já aponta pro fork (`ecjimenez/OpenWA`).
 Deploy da integração = `git fetch && git checkout <branch/tag> && docker
 compose build && docker compose up -d`, mais `OPENWA_INGRESS_URL` no env do
 Supabase pra ligar o push (hoje é no-op).
+
+---
+
+## RESULTADO (12/08/2026, noite)
+
+Implementado e EM PRODUÇÃO: fork `ecjimenez/OpenWA`, branch `engine-waba-relay`,
+commit `d444d3b8` (40 arquivos, +1360). Divisão real do trabalho: Codex (via
+Octopus develop) entregou o engine-por-sessão completo; adapter, plugin,
+config, ingress e allowlists de guard foram feitos à mão contra este mapa.
+
+Prova de vida: sessão "cerebro" criada com `{"engine":"waba-relay"}` ficou
+READY em 11s sem QR; backlog inteiro apareceu no painel (chat "ej 🐙" com
+histórico dos dois sentidos); envio painel→relay→Meta entregue no celular.
+Ingress público responde 401 sem assinatura. Migration roda no boot.
+
+Detalhes de deploy que valem ouro:
+- compose upstream NÃO repassa env vars novas: `docker-compose.override.yml`
+  na VPS encaminha WABA_RELAY_*/OPENWA_PUSH_SECRET pro container.
+- clone raso da VPS não enxerga branch nova sem consertar o refspec:
+  `git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"`.
+- Guards do repo que um engine novo obrigatoriamente toca: enum de
+  ENGINE_TYPE em env.validation, allowlist EXPECTED_PUBLIC_CONTROLLERS +
+  PUBLIC_PATHS (swagger.config e spec). A capability matrix NÃO se toca.
