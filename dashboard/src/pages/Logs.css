@@ -356,3 +356,43 @@
     padding: 0.75rem;
   }
 }
+
+/* ── Detalhe expansível por linha (debug: método, rota, status, erro) ── */
+
+.logs-table .table-row.expandable {
+  cursor: pointer;
+}
+
+.logs-table .table-row.expandable:hover,
+.logs-table .table-row.expanded {
+  background: var(--primary-05);
+}
+
+.log-detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 32px;
+  margin: 0;
+  padding: 12px 16px;
+  background: var(--bg-light);
+  border-left: 2px solid var(--primary);
+  font-size: 0.82rem;
+}
+
+.log-detail dt {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.log-detail dd {
+  margin: 2px 0 0;
+  font-family: 'JetBrains Mono', monospace;
+  word-break: break-all;
+}
+
+.log-detail-error {
+  flex-basis: 100%;
+}

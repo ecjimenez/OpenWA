@@ -16,6 +16,7 @@ export function Logs() {
   const { t } = useTranslation();
   useDocumentTitle(t('logs.title'));
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [severityFilter, setSeverityFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [exporting, setExporting] = useState(false);
@@ -179,15 +180,48 @@ export function Logs() {
             </div>
           ) : (
             filteredLogs.map(log => (
-              <div key={log.id} className="table-row">
-                <span className="timestamp">{formatTimestamp(log.createdAt)}</span>
-                <span className="action">{log.action}</span>
-                <span>{log.sessionName || log.sessionId || '—'}</span>
-                <span className="api-key">{log.apiKeyName || '—'}</span>
-                <span className="ip">{log.ipAddress || '—'}</span>
-                <span>
-                  <span className={`severity-badge ${log.severity}`}>{log.severity.toUpperCase()}</span>
-                </span>
+              <div key={log.id}>
+                <div
+                  className={`table-row expandable ${expandedId === log.id ? 'expanded' : ''}`}
+                  onClick={() => setExpandedId(current => (current === log.id ? null : log.id))}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setExpandedId(current => (current === log.id ? null : log.id));
+                    }
+                  }}
+                >
+                  <span className="timestamp">{formatTimestamp(log.createdAt)}</span>
+                  <span className="action">{log.action}</span>
+                  <span>{log.sessionName || log.sessionId || '—'}</span>
+                  <span className="api-key">{log.apiKeyName || '—'}</span>
+                  <span className="ip">{log.ipAddress || '—'}</span>
+                  <span>
+                    <span className={`severity-badge ${log.severity}`}>{log.severity.toUpperCase()}</span>
+                  </span>
+                </div>
+                {expandedId === log.id && (
+                  <dl className="log-detail">
+                    <div>
+                      <dt>Método</dt>
+                      <dd>{log.method || '—'}</dd>
+                    </div>
+                    <div>
+                      <dt>Rota</dt>
+                      <dd>{log.path || '—'}</dd>
+                    </div>
+                    <div>
+                      <dt>Status HTTP</dt>
+                      <dd>{log.statusCode ?? '—'}</dd>
+                    </div>
+                    <div className="log-detail-error">
+                      <dt>Erro</dt>
+                      <dd>{log.errorMessage || '—'}</dd>
+                    </div>
+                  </dl>
+                )}
               </div>
             ))
           )}
