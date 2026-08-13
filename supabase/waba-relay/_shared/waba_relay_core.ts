@@ -334,6 +334,32 @@ export async function removerTemplate(db: SupabaseClient, params: URLSearchParam
   return { nome, removido: true };
 }
 
+const GROQ_STT_URL = 'https://api.groq.com/openai/v1/audio/transcriptions';
+
+/**
+ * Proxy STT no contrato OpenAI pro plugin voice-transcription do painel:
+ * repassa o multipart (file/model/language) ao Whisper do Groq usando a
+ * GROQ_API_KEY do projeto — a chave nunca vai pra VPS, mesma fronteira de
+ * credencial do resto do relay.
+ */
+export async function transcreverAudio(req: Request): Promise<Response> {
+  const chave = Deno.env.get('GROQ_API_KEY');
+  if (!chave) throw new Error('GROQ_API_KEY não configurada');
+
+  const res = await fetch(GROQ_STT_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${chave}`,
+      'content-type': req.headers.get('content-type') ?? 'application/octet-stream',
+    },
+    body: req.body,
+  });
+  return new Response(res.body, {
+    status: res.status,
+    headers: { 'content-type': res.headers.get('content-type') ?? 'application/json' },
+  });
+}
+
 export async function urlDaMidia(db: SupabaseClient, messageId: string | null) {
   if (!messageId) throw new Error('contrato: parâmetro id é obrigatório');
   const { data, error } = await db.schema('waba').from('messages')

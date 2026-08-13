@@ -14,7 +14,7 @@
 import { serviceClient } from '../_shared/supabase.ts';
 import { errorMessage, json } from '../_shared/http.ts';
 import { igualSeguro } from '../_shared/tempo_constante.ts';
-import { enviarViaOutbox, listarChats, listarMensagens, listarTemplates, removerTemplate, submeterTemplate, subirMidia, urlDaMidia } from '../_shared/waba_relay_core.ts';
+import { enviarViaOutbox, listarChats, listarMensagens, listarTemplates, removerTemplate, submeterTemplate, subirMidia, transcreverAudio, urlDaMidia } from '../_shared/waba_relay_core.ts';
 import { atualizarContato, criarContato, listarContatos, removerContato } from '../_shared/waba_relay_contatos.ts';
 
 Deno.serve(async (req) => {
@@ -22,7 +22,11 @@ Deno.serve(async (req) => {
   // Fail closed: sem segredo configurado ninguém entra, nem por acidente.
   if (!segredo) return json({ error: 'relay não configurado' }, { status: 503 });
 
-  const recebido = req.headers.get('x-relay-secret') ?? '';
+  // O plugin de transcrição do OpenWA fala o contrato OpenAI e só sabe mandar
+  // Authorization: Bearer — aceito o mesmo segredo pelos dois formatos.
+  const auth = req.headers.get('authorization') ?? '';
+  const bearer = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  const recebido = req.headers.get('x-relay-secret') ?? bearer;
   if (!igualSeguro(recebido, segredo)) return json({ error: 'forbidden' }, { status: 403 });
 
   const url = new URL(req.url);
@@ -45,6 +49,9 @@ Deno.serve(async (req) => {
     }
     if (req.method === 'POST' && rota === 'templates') {
       return json(await submeterTemplate(db, await req.json()));
+    }
+    if (req.method === 'POST' && rota === 'v1/audio/transcriptions') {
+      return await transcreverAudio(req);
     }
     if (req.method === 'DELETE' && rota === 'templates') {
       return json(await removerTemplate(db, url.searchParams));
