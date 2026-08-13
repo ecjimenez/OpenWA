@@ -31,6 +31,10 @@ export class WabaRelayTemplatesService {
     return this.adapterOf(sessionId).submitTemplate(input);
   }
 
+  deleteTemplate(sessionId: string, nome: string): Promise<unknown> {
+    return this.adapterOf(sessionId).deleteTemplate(nome);
+  }
+
   sendTemplate(
     sessionId: string,
     chatId: string,

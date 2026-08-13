@@ -344,6 +344,17 @@ export class WabaRelayAdapter implements IWhatsAppEngine {
     return body;
   }
 
+  /** Exclui um template na Meta (todas as variantes de idioma do nome). Irreversível. */
+  async deleteTemplate(nome: string): Promise<unknown> {
+    const url = new URL(`${this.opts.hubUrl}/templates`);
+    url.searchParams.set('phone', this.opts.phone);
+    url.searchParams.set('nome', nome);
+    const res = await fetch(url, { method: 'DELETE', headers: { 'x-relay-secret': this.opts.hubSecret } });
+    const body = (await res.json()) as { error?: string };
+    if (!res.ok) throw new Error(body.error ?? `hub DELETE /templates: ${res.status}`);
+    return body;
+  }
+
   // ── Contatos do gateway (cerebro.contatos via hub) ────────────────────
 
   async listContacts(): Promise<HubContato[]> {

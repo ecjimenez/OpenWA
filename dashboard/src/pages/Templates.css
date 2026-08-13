@@ -509,3 +509,131 @@
     padding: 1rem;
   }
 }
+
+/* ── Templates Meta (sessões waba-relay) ─────────────────────────────── */
+
+.waba-templates-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.waba-templates-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+}
+
+.waba-templates-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.waba-templates-picker label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+
+.waba-templates-picker select {
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 0;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.waba-template-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.waba-template-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.waba-template-card-header > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.waba-template-card-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.waba-status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border: 1px solid currentColor;
+}
+
+.waba-status.approved {
+  color: #1a7f37;
+}
+
+.waba-status.pending {
+  color: #9a6700;
+}
+
+.waba-status.rejected {
+  color: var(--primary);
+}
+
+.waba-template-meta {
+  display: flex;
+  gap: 24px;
+  margin: 0;
+}
+
+.waba-template-meta dt {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.waba-template-meta dd {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+}
+
+.waba-template-body {
+  margin: 0;
+  padding: 12px;
+  background: var(--bg-light);
+  border-left: 2px solid var(--primary);
+  font-size: 0.88rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+}
+
+.waba-template-header-text {
+  margin: 0;
+  font-weight: 600;
+}
+
+.waba-template-footer-text {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}

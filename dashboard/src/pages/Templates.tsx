@@ -13,6 +13,7 @@ import {
 } from '../hooks/queries';
 import { PageHeader } from '../components/PageHeader';
 import { Modal } from '../components/Modal';
+import { WabaTemplatesPanel } from '../components/templates/WabaTemplatesPanel';
 import { copyToClipboard } from '../utils/clipboard';
 import './Templates.css';
 
@@ -219,7 +220,10 @@ export function Templates() {
         }
       />
 
-      {sessions.length === 0 ? (
+      {selectedSession?.engine === 'waba-relay' ? (
+        // Sessão WABA: os templates que valem são os da conta Meta, não os locais.
+        <WabaTemplatesPanel sessionId={selectedSession.id} canWrite={canWrite} />
+      ) : sessions.length === 0 ? (
         <div className="templates-empty-page">
           <FileText size={48} strokeWidth={1} />
           <h3>{t('templates.empty.noSessionsTitle')}</h3>

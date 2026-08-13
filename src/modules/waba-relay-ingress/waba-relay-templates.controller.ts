@@ -4,7 +4,7 @@
  * controller) is @Public.
  */
 
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { IsArray, IsIn, IsNotEmpty, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
 import { WabaRelayTemplatesService } from './waba-relay-templates.service';
@@ -77,6 +77,14 @@ export class WabaRelayTemplatesController {
   @ApiParam({ name: 'sessionId', description: 'Session ID' })
   submit(@Param('sessionId') sessionId: string, @Body() dto: SubmitTemplateDto) {
     return this.templates.submitTemplate(sessionId, dto);
+  }
+
+  @Delete('templates/:nome')
+  @ApiOperation({ summary: 'Delete a Meta template by name (all language variants; irreversible)' })
+  @ApiParam({ name: 'sessionId', description: 'Session ID' })
+  @ApiParam({ name: 'nome', description: 'Template name' })
+  remove(@Param('sessionId') sessionId: string, @Param('nome') nome: string) {
+    return this.templates.deleteTemplate(sessionId, nome);
   }
 
   @Post('send-template')

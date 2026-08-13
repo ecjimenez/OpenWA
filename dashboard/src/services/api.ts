@@ -756,6 +756,11 @@ export const wabaRelayApi = {
       method: 'POST',
       body: JSON.stringify(body),
     }),
+  deleteTemplate: (sessionId: string, nome: string) =>
+    request<{ nome: string; removido: boolean }>(
+      `/waba-relay/sessions/${sessionId}/templates/${encodeURIComponent(nome)}`,
+      { method: 'DELETE' },
+    ),
   sendTemplate: (sessionId: string, body: { chatId: string; nome: string; idioma?: string; components?: unknown[] }) =>
     request<{ id: string; timestamp: number }>(`/waba-relay/sessions/${sessionId}/send-template`, {
       method: 'POST',
