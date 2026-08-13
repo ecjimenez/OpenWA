@@ -40,8 +40,8 @@
 .sidebar-logo {
   width: 28px;
   height: 28px;
-  object-fit: contain;
   flex-shrink: 0;
+  object-fit: cover;
 }
 
 .mobile-brand .sidebar-logo {

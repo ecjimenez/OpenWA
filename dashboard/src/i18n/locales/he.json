@@ -6,7 +6,7 @@
     }
   },
   "common": {
-    "appName": "OpenWA",
+    "appName": "Conversinha",
     "loading": "טוען...",
     "cancel": "ביטול",
     "delete": "מחיקה",
@@ -183,7 +183,7 @@
     "connectionError": "לא ניתן להתחבר לשרת. יש לנסות שוב.",
     "help": "צריך עזרה?",
     "viewDocs": "לצפייה בתיעוד",
-    "footer": "נבנה באהבה על ידי Yudhi Armyndharis וקהילת OpenWA",
+    "footer": "נבנה באהבה על ידי Yudhi Armyndharis וקהילת Conversinha",
     "version": "v{{version}} · {{date}}"
   },
   "dashboard": {
@@ -691,7 +691,7 @@
       "postgres": "PostgreSQL",
       "postgresDesc": "מסד נתונים מוכן לייצור",
       "useBuiltIn": "שימוש בקונטיינר PostgreSQL מובנה",
-      "builtInDesc": "OpenWA ינהל עבורך קונטיינר PostgreSQL",
+      "builtInDesc": "Conversinha ינהל עבורך קונטיינר PostgreSQL",
       "dbName": "שם מסד הנתונים",
       "schema": "סכמה",
       "schemaDesc": "סכמת PostgreSQL (לא חלה על SQLite). ברירת מחדל 'public'. הסכמה חייבת להיות קיימת מראש.",
@@ -726,7 +726,7 @@
       "enable": "הפעלת Redis",
       "enableDesc": "נדרש למטמון, אחסון Sessions ותורי BullMQ",
       "useBuiltIn": "שימוש בקונטיינר Redis מובנה",
-      "builtInDesc": "OpenWA ינהל עבורך קונטיינר Redis",
+      "builtInDesc": "Conversinha ינהל עבורך קונטיינר Redis",
       "queueTitle": "הפעלת מערכת התורים BullMQ",
       "queueDesc": "שימוש בתורי הודעות לאספקה אמינה של הודעות ו-Webhooks",
       "statsTitle": "סטטיסטיקות תור",
@@ -748,7 +748,7 @@
       "s3": "Amazon S3",
       "s3Desc": "אחסון ענן (תואם S3)",
       "useBuiltIn": "שימוש בקונטיינר MinIO מובנה",
-      "builtInDesc": "OpenWA ינהל עבורך קונטיינר MinIO (תואם S3)",
+      "builtInDesc": "Conversinha ינהל עבורך קונטיינר MinIO (תואם S3)",
       "storagePath": "נתיב אחסון",
       "bucket": "שם Bucket",
       "region": "אזור (Region)",
@@ -799,7 +799,7 @@
       "importFailed": "לא ניתן לייבא את הנתונים",
       "importOk": "הנתונים יובאו",
       "importConfirm": "הייבוא יחליף את כל הנתונים הנוכחיים בגיבוי ({{rows}} שורות). לא ניתן לבטל פעולה זו. להמשיך?",
-      "invalidFile": "הקובץ הזה אינו גיבוי נתונים תקין של OpenWA.",
+      "invalidFile": "הקובץ הזה אינו גיבוי נתונים תקין של Conversinha.",
       "importTooLarge": "הגיבוי גדול מדי עבור מגבלת הבקשה. הגדילו את BODY_SIZE_LIMIT בשרת ונסו שוב."
     },
     "statusLoadError": "לא ניתן לטעון את מצב התשתית הנוכחי. רעננו כדי לנסות שוב."
@@ -819,7 +819,7 @@
     "uninstallConfirm": "להסיר את \"{{name}}\"? פעולה זו תמחק את הקבצים שלו.",
     "empty": {
       "title": "לא נמצאו תוספים",
-      "description": "ניתן להתקין תוספים כדי להרחיב את היכולות של OpenWA"
+      "description": "ניתן להתקין תוספים כדי להרחיב את היכולות של Conversinha"
     },
     "config": {
       "title": "הגדרת {{name}}",
@@ -841,7 +841,7 @@
       "hint": "ניתן להעלות תוסף ארוז כקובץ .zip (הכולל manifest.json). הוא פועל בארגז חול לאחר ההפעלה.",
       "choose": "בחירת קובץ ‎.zip‎…",
       "tooLarge": "הקובץ חורג מהמגבלה של ‎5 MB‎.",
-      "catalogHint": "התקינו ישירות מקטלוג התוספים של OpenWA. קובץ ה-.zip נשלף מהשרת דרך מגן ה-SSRF, מאומת ומורץ בארגז חול.",
+      "catalogHint": "התקינו ישירות מקטלוג התוספים של Conversinha. קובץ ה-.zip נשלף מהשרת דרך מגן ה-SSRF, מאומת ומורץ בארגז חול.",
       "catalogTeaser": "מחפשים תוספים?",
       "catalogTeaserSuffix": "סוקר את החנות הרשמית.",
       "tabCatalog": "קטלוג",
