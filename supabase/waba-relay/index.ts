@@ -15,6 +15,7 @@ import { serviceClient } from '../_shared/supabase.ts';
 import { errorMessage, json } from '../_shared/http.ts';
 import { igualSeguro } from '../_shared/tempo_constante.ts';
 import { enviarViaOutbox, listarChats, listarMensagens, listarTemplates, submeterTemplate, subirMidia, urlDaMidia } from '../_shared/waba_relay_core.ts';
+import { atualizarContato, criarContato, listarContatos, removerContato } from '../_shared/waba_relay_contatos.ts';
 
 Deno.serve(async (req) => {
   const segredo = Deno.env.get('WABA_RELAY_SECRET');
@@ -44,6 +45,18 @@ Deno.serve(async (req) => {
     }
     if (req.method === 'POST' && rota === 'templates') {
       return json(await submeterTemplate(db, await req.json()));
+    }
+    if (req.method === 'GET' && rota === 'contacts') {
+      return json(await listarContatos(db));
+    }
+    if (req.method === 'POST' && rota === 'contacts') {
+      return json(await criarContato(db, await req.json()));
+    }
+    if (req.method === 'PATCH' && rota === 'contacts') {
+      return json(await atualizarContato(db, await req.json()));
+    }
+    if (req.method === 'DELETE' && rota === 'contacts') {
+      return json(await removerContato(db, url.searchParams.get('id')));
     }
     if (req.method === 'GET' && rota === 'media') {
       return json(await urlDaMidia(db, url.searchParams.get('id')));
