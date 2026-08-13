@@ -24,6 +24,10 @@ export default defineConfig({
     // The login animation has no expressions, so use Lottie's expression-free player. This avoids
     // shipping the full player's eval-based expression runtime to an unauthenticated screen.
     alias: {
+      // The lottie-web alias below makes Vite resolve lottie-react through its CJS build, whose
+      // interop wraps the component in an extra `default` — `import Lottie` then receives the
+      // exports object and React throws #130. Pinning the ESM build restores the real component.
+      'lottie-react': 'lottie-react/build/index.es.js',
       'lottie-web': 'lottie-web/build/player/lottie_light.js',
     },
   },
