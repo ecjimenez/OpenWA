@@ -13,9 +13,6 @@ import {
   Send,
   Server,
   Puzzle,
-  Sun,
-  Moon,
-  Monitor,
   Menu,
   X,
   ChevronLeft,
@@ -23,7 +20,6 @@ import {
   Languages,
   Users,
 } from 'lucide-react';
-import { useTheme } from '../hooks/useTheme';
 import { type UserRole } from '../hooks/useRole';
 import { languageOptions, resolveSupportedLanguage, rtlLanguages, type SupportedLanguage } from '../i18n';
 import { healthApi } from '../services/api';
@@ -50,13 +46,8 @@ const allNavItems = [
   { to: '/logs', icon: FileText, key: 'logs' as const, adminOnly: false },
 ];
 
-const themeIcons = { light: Sun, dark: Moon, system: Monitor };
-
 export function Layout({ onLogout, userRole }: LayoutProps) {
   const { t, i18n } = useTranslation();
-  const { theme, setTheme, resolvedTheme } = useTheme();
-  const ThemeIcon = themeIcons[theme];
-  const themeLabel = t(`theme.${theme}`);
 
   const navItems = allNavItems.filter(item => !item.adminOnly || userRole === 'admin');
 
@@ -234,19 +225,6 @@ export function Layout({ onLogout, userRole }: LayoutProps) {
                 ))}
               </div>
             )}
-          </div>
-          <div className="appearance-menu">
-            <button
-              className="theme-toggle-btn"
-              onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-              title={t('theme.toggleTo', { value: t(resolvedTheme === 'dark' ? 'theme.light' : 'theme.dark') })}
-              aria-label={t('theme.toggleTo', { value: t(resolvedTheme === 'dark' ? 'theme.light' : 'theme.dark') })}
-            >
-              <span className="appearance-button-cue" aria-hidden="true">
-                <ThemeIcon size={16} />
-              </span>
-              {!isCollapsed && <span>{themeLabel}</span>}
-            </button>
           </div>
           <button className="logout-btn" onClick={onLogout} title={isCollapsed ? t('common.logout') : undefined}>
             <LogOut size={20} />

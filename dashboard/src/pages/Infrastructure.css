@@ -19,6 +19,7 @@
 
 .infrastructure-page .infra-card {
   background: var(--bg-white);
+  backdrop-filter: var(--surface-blur);
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
@@ -61,7 +62,7 @@
 }
 
 .infrastructure-page .status-indicator.connected {
-  background: rgba(37, 211, 102, 0.1);
+  background: var(--primary-10);
   color: var(--primary);
 }
 
@@ -100,7 +101,7 @@
 
 .infrastructure-page .radio-option.selected {
   border-color: var(--primary);
-  background: rgba(37, 211, 102, 0.05);
+  background: var(--primary-05);
 }
 
 .infrastructure-page .radio-option input {

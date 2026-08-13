@@ -15,6 +15,7 @@
   gap: 0.75rem;
   padding: 1rem 1.25rem;
   background: var(--bg-card);
+  backdrop-filter: var(--surface-blur);
   border-radius: 12px;
   box-shadow:
     0 10px 40px rgba(0, 0, 0, 0.12),
@@ -35,11 +36,11 @@
 }
 
 .toast-success {
-  border-color: #22c55e;
+  border-color: var(--success);
 }
 
 .toast-success .toast-icon {
-  color: #22c55e;
+  color: var(--success);
 }
 
 .toast-error {

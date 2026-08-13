@@ -64,6 +64,7 @@
 
 .logs-page .logs-table-container {
   background: var(--bg-white);
+  backdrop-filter: var(--surface-blur);
   border-radius: 12px;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border);
@@ -102,7 +103,7 @@
 }
 
 .logs-page .logs-table .table-row:not(.header):hover {
-  background: rgba(37, 211, 102, 0.05);
+  background: var(--primary-05);
 }
 
 .logs-page .timestamp {

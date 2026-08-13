@@ -73,6 +73,7 @@
 
 .sessions-page .session-card {
   background: var(--bg-white);
+  backdrop-filter: var(--surface-blur);
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
@@ -296,7 +297,7 @@
 /* Modal Card */
 .sessions-page .modal {
   background: var(--bg-white);
-  border-radius: 16px;
+  border-radius: 12px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   width: 90%;
   max-width: 480px;
@@ -377,7 +378,7 @@
   outline: none;
   border-color: var(--primary);
   background: var(--bg-white);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+  box-shadow: 0 0 0 3px var(--primary-10);
 }
 
 .sessions-page .modal-body input::placeholder {
@@ -489,7 +490,7 @@
 }
 
 .sessions-page .status-badge.connected {
-  background: rgba(34, 197, 94, 0.1);
+  background: var(--primary-10);
   color: var(--success);
 }
 
@@ -667,7 +668,7 @@
 }
 
 .sessions-page .status-pill.ready {
-  background: rgba(34, 197, 94, 0.1);
+  background: var(--primary-10);
   color: var(--success);
 }
 

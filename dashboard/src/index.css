@@ -17,7 +17,7 @@ html[lang='ar'] {
 }
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   color: var(--text-primary);
   background-color: var(--bg-light);
 
@@ -39,6 +39,7 @@ body {
 }
 
 h1 {
+  font-family: 'Bricolage Grotesque', 'Pacaembu', system-ui, sans-serif;
   font-size: 1.875rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -50,6 +51,7 @@ h1 {
    forced pages to keep resetting it (and left section titles smaller than body text). The eyebrow
    look is now opt-in via .eyebrow for the section/card labels that actually want it. */
 h2 {
+  font-family: 'Bricolage Grotesque', 'Pacaembu', system-ui, sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -57,6 +59,7 @@ h2 {
 }
 
 .eyebrow {
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--text-secondary);
@@ -66,6 +69,7 @@ h2 {
 }
 
 h3 {
+  font-family: 'Bricolage Grotesque', 'Pacaembu', system-ui, sans-serif;
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
@@ -73,7 +77,7 @@ h3 {
 }
 
 button {
-  border-radius: 8px;
+  border-radius: 0;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
   font-size: 1em;
@@ -87,7 +91,7 @@ button {
 button:focus-visible,
 a:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid var(--primary, #25d366);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 button:focus:not(:focus-visible) {
@@ -95,18 +99,7 @@ button:focus:not(:focus-visible) {
 }
 
 html {
-  /* Root/overscroll background follows the app theme token, so an explicit dark theme on a
-     light-OS device doesn't reveal a white <html> background above/below the body (overscroll). */
   background-color: var(--bg-light);
-}
-
-@media (prefers-color-scheme: light) {
-  /* Guarded with :not([data-theme='dark']): when the OS prefers light but the user explicitly
-     picked the dark theme, the app's own choice must win (otherwise the root is force-whitened). */
-  :root:not([data-theme='dark']) {
-    color: #213547;
-    background-color: #ffffff;
-  }
 }
 
 /* Global select/dropdown styling */
@@ -125,19 +118,19 @@ select {
   background-position: right 0.75rem center;
   background-size: 16px;
   border: 1px solid var(--border, #e2e8f0);
-  border-radius: 8px;
+  border-radius: 0;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 select:hover {
-  border-color: var(--primary, #25d366);
+  border-color: var(--primary);
 }
 
 select:focus {
   outline: none;
-  border-color: var(--primary, #25d366);
-  box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-10);
 }
 
 select:disabled {
@@ -173,7 +166,8 @@ select:disabled {
 /* Modal Card */
 .modal {
   background: var(--bg-white, #fff);
-  border-radius: 16px;
+  backdrop-filter: var(--surface-blur);
+  border-radius: 12px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   width: 90%;
   max-width: 480px;
@@ -242,7 +236,7 @@ select:disabled {
   width: 100%;
   padding: 0.875rem 1rem;
   border: 1px solid var(--border, #e2e8f0);
-  border-radius: 8px;
+  border-radius: 0;
   font-size: 0.9375rem;
   background: var(--bg-light, #f8fafc);
   transition: all 0.2s;
@@ -251,9 +245,9 @@ select:disabled {
 
 .modal-body input:focus {
   outline: none;
-  border-color: var(--primary, #25d366);
+  border-color: var(--primary);
   background: var(--bg-white, #fff);
-  box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+  box-shadow: 0 0 0 3px var(--primary-10);
 }
 
 /* The rule above is meant for TEXT inputs. Radios/checkboxes would otherwise stretch to width:100%
@@ -288,7 +282,7 @@ select:disabled {
   height: 36px;
   background: var(--bg-light, #f8fafc);
   border: 1px solid var(--border, #e2e8f0);
-  border-radius: 8px;
+  border-radius: 0;
   cursor: pointer;
   color: var(--text-secondary, #64748b);
   transition: all 0.2s;
@@ -318,10 +312,10 @@ select:disabled {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
-  background: var(--bg-light, #f8fafc);
-  color: var(--text-secondary, #64748b);
-  border: 1px solid var(--border, #e2e8f0);
-  border-radius: 8px;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--text-primary);
+  border-radius: 0;
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
@@ -329,9 +323,9 @@ select:disabled {
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--bg-white, #fff);
-  border-color: var(--text-muted, #94a3b8);
-  color: var(--text-primary, #1e293b);
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  color: #fff;
 }
 
 .btn-secondary:disabled {
@@ -346,10 +340,10 @@ select:disabled {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
-  background: var(--primary, #25d366);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
+  background: var(--coral);
+  color: var(--text-primary);
+  border: 1px solid var(--coral);
+  border-radius: 0;
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
@@ -357,7 +351,7 @@ select:disabled {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--primary-hover, #1da851);
+  background: #e85a31;
 }
 
 .btn-primary:disabled {
@@ -509,7 +503,7 @@ code {
   .modal {
     width: 100%;
     margin: 0;
-    border-radius: 16px 16px 0 0;
+    border-radius: 12px 12px 0 0;
     /* max-height + body scroll already come from the base .modal rule; the bottom-sheet only
        changes width/anchoring. (Scrolling lives on .modal-body to avoid a double scrollbar.) */
   }
@@ -540,11 +534,79 @@ code {
 }
 
 /* ── Aba Contatos (gateway do cerebro) ───────────────────────────────── */
+.contatos-page {
+  width: 100%;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+.contatos-page .page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
 .contatos-page .card {
-  background: var(--card-bg, rgba(0, 0, 0, 0.03));
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: var(--surface-blur);
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 16px;
+}
+.contatos-page .card h2 {
+  margin-bottom: 0.5rem;
+}
+.contatos-page .form-hint,
+.contatos-page .contatos-lista > p {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+.contatos-page .form-hint {
+  margin: 0 0 1.25rem;
+  max-width: 70ch;
+}
+.contatos-page .compose-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.contatos-page .compose-row:has(> :nth-child(3)) {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.contatos-page .compose-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+.contatos-page .compose-field label {
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.contatos-page .compose-field input,
+.contatos-page .compose-field select,
+.contatos-page .contatos-table select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--bg-light);
+  color: var(--text-primary);
+  padding: 0.65rem 0.75rem;
+}
+.contatos-page .compose-field input:focus,
+.contatos-page .compose-field select:focus,
+.contatos-page .contatos-table select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-10);
 }
 .contatos-header-actions {
   display: flex;
@@ -563,15 +625,81 @@ code {
 .contatos-table td {
   text-align: left;
   padding: 8px 10px;
-  border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+  border-bottom: 1px solid var(--border);
 }
-.contato-estado-ativo { color: var(--success, #16a34a); }
-.contato-estado-pendente { color: var(--warning, #d97706); }
-.contato-estado-vencido { color: var(--danger, #dc2626); }
-.contatos-feedback { margin-top: 10px; font-size: 0.9em; }
+.contatos-table th {
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.contatos-table td {
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+.contatos-table tbody tr:hover {
+  background: var(--primary-05);
+}
+.contatos-page .form-error {
+  color: var(--error);
+}
+.contato-estado-ativo {
+  color: var(--success);
+}
+.contato-estado-pendente {
+  color: var(--warning, #d97706);
+}
+.contato-estado-vencido {
+  color: var(--error);
+}
+.contatos-feedback {
+  margin-top: 10px;
+  font-size: 0.9em;
+}
 .contatos-form .btn-primary {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   margin-top: 8px;
+}
+
+/* Baleia action language: all interactive buttons are square; roundness belongs to surfaces and
+   status markers, not controls. The important override keeps page-local legacy rules from
+   reintroducing rounded action buttons. */
+button.btn-primary,
+button.btn-secondary,
+button.btn-danger,
+button.btn-icon,
+button.btn-action,
+button.btn-close,
+button.btn-sm,
+button.icon-btn,
+button.icon-btn-sm,
+button.btn-toggle,
+button.btn-update,
+button.send-btn {
+  border-radius: 0 !important;
+}
+
+button {
+  border-radius: 0 !important;
+}
+
+@media (max-width: 768px) {
+  .contatos-page {
+    padding: 1rem;
+  }
+
+  .contatos-page .page-header,
+  .contatos-header-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .contatos-page .compose-row,
+  .contatos-page .compose-row:has(> :nth-child(3)) {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
 }

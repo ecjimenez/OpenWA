@@ -24,6 +24,7 @@
 .message-tester .compose-panel,
 .message-tester .response-panel {
   background: var(--bg-white);
+  backdrop-filter: var(--surface-blur);
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
@@ -105,8 +106,8 @@
 }
 
 .message-tester .toggle-group button.active {
-  background: var(--primary);
-  color: white;
+  background: var(--coral);
+  color: var(--text-primary);
 }
 
 .message-tester .send-btn {
@@ -118,16 +119,16 @@
   padding: 0.875rem 1.5rem;
   font-size: 1rem;
   font-weight: 600;
-  color: white;
-  background: var(--primary);
+  color: var(--text-primary);
+  background: var(--coral);
   border: none;
-  border-radius: var(--radius);
+  border-radius: 0;
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .message-tester .send-btn:hover:not(:disabled) {
-  background: var(--primary-hover);
+  background: #e85a31;
 }
 
 .message-tester .send-btn:disabled {
@@ -147,7 +148,7 @@
 }
 
 .message-tester .response-status.success {
-  background: rgba(37, 211, 102, 0.1);
+  background: var(--primary-10);
   color: var(--primary);
 }
 
@@ -408,7 +409,7 @@
 }
 
 .message-tester .batch-badge.completed {
-  background: rgba(37, 211, 102, 0.12);
+  background: var(--primary-soft);
   color: var(--primary);
 }
 
