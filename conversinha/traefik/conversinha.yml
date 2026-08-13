@@ -1,0 +1,13 @@
+http:
+  routers:
+    conversinha:
+      rule: "Host(`conversinha.doenrique.com`)"
+      entryPoints: [websecure]
+      tls:
+        certResolver: letsencrypt
+      service: conversinha
+  services:
+    conversinha:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:2785"
