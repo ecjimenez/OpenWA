@@ -731,6 +731,19 @@ export interface WabaTemplate {
   sincronizado_em: string | null;
 }
 
+export interface GatewayContato {
+  id: string;
+  wa_id: string;
+  nome: string | null;
+  flow: string;
+  periodo_dias: number | null;
+  template_nome: string | null;
+  estado: 'pendente' | 'ativo' | 'vencido';
+  habilitado_em: string | null;
+  valido_ate: string | null;
+  criado_em: string;
+}
+
 // Templates Meta de sessões waba-relay (fork): listar, submeter à análise da
 // Meta e enviar template aprovado (único caminho com a janela de 24h fechada).
 export const wabaRelayApi = {
@@ -748,6 +761,32 @@ export const wabaRelayApi = {
       method: 'POST',
       body: JSON.stringify(body),
     }),
+  // Contatos do gateway do cerebro: cadastro dispara o template de abertura
+  // (template enviado = contato habilitado pro flow naquele período).
+  listContacts: (sessionId: string) => request<GatewayContato[]>(`/waba-relay/sessions/${sessionId}/contacts`),
+  createContact: (
+    sessionId: string,
+    body: {
+      wa_id: string;
+      nome?: string;
+      flow?: string;
+      periodo_dias?: number | null;
+      template_nome: string;
+      template_idioma?: string;
+      template_components?: unknown[];
+    },
+  ) =>
+    request<{ id: string; estado: string; template: string; motivo?: string | null }>(
+      `/waba-relay/sessions/${sessionId}/contacts`,
+      { method: 'POST', body: JSON.stringify(body) },
+    ),
+  updateContact: (sessionId: string, contactId: string, body: { nome?: string; flow?: string; periodo_dias?: number | null }) =>
+    request<{ ok: boolean }>(`/waba-relay/sessions/${sessionId}/contacts/${contactId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    }),
+  deleteContact: (sessionId: string, contactId: string) =>
+    request<{ ok: boolean }>(`/waba-relay/sessions/${sessionId}/contacts/${contactId}`, { method: 'DELETE' }),
 };
 
 export const sessionApi = {

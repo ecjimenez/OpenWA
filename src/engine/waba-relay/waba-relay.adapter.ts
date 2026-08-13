@@ -95,6 +95,29 @@ export type SubmitTemplateInput = {
   exemplo?: string[];
 };
 
+export type HubContato = {
+  id: string;
+  wa_id: string;
+  nome: string | null;
+  flow: string;
+  periodo_dias: number | null;
+  template_nome: string | null;
+  estado: 'pendente' | 'ativo' | 'vencido';
+  habilitado_em: string | null;
+  valido_ate: string | null;
+  criado_em: string;
+};
+
+export type CriarContatoInput = {
+  wa_id: string;
+  nome?: string;
+  flow?: string;
+  periodo_dias?: number | null;
+  template_nome: string;
+  template_idioma?: string;
+  template_components?: unknown[];
+};
+
 export type WabaRelayPushEvent = {
   evento: 'mensagem' | 'status' | 'media_ready';
   phone?: string | null;
@@ -319,6 +342,41 @@ export class WabaRelayAdapter implements IWhatsAppEngine {
     // O motivo da recusa da Meta volta legível pro formulário do painel.
     if (!res.ok) throw new Error(body.error ?? `hub POST /templates: ${res.status}`);
     return body;
+  }
+
+  // ── Contatos do gateway (cerebro.contatos via hub) ────────────────────
+
+  async listContacts(): Promise<HubContato[]> {
+    const data = (await this.hubGet('/contacts')) as { contatos: HubContato[] };
+    return data.contatos ?? [];
+  }
+
+  async createContact(input: CriarContatoInput): Promise<unknown> {
+    return this.hubJson('POST', '/contacts', { phone: this.opts.phone, ...input });
+  }
+
+  async updateContact(id: string, patch: { nome?: string; flow?: string; periodo_dias?: number | null }): Promise<unknown> {
+    return this.hubJson('PATCH', '/contacts', { id, ...patch });
+  }
+
+  async deleteGatewayContact(contactId: string): Promise<unknown> {
+    const url = new URL(`${this.opts.hubUrl}/contacts`);
+    url.searchParams.set('id', contactId);
+    const res = await fetch(url, { method: 'DELETE', headers: { 'x-relay-secret': this.opts.hubSecret } });
+    const body = (await res.json()) as { error?: string };
+    if (!res.ok) throw new Error(body.error ?? `hub DELETE /contacts: ${res.status}`);
+    return body;
+  }
+
+  private async hubJson(method: string, route: string, body: unknown): Promise<unknown> {
+    const res = await fetch(`${this.opts.hubUrl}${route}`, {
+      method,
+      headers: { 'x-relay-secret': this.opts.hubSecret, 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const parsed = (await res.json()) as { error?: string };
+    if (!res.ok) throw new Error(parsed.error ?? `hub ${method} ${route}: ${res.status}`);
+    return parsed;
   }
 
   /** Envia template aprovado — o único caminho de saída com a janela de 24h fechada. */

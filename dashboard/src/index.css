@@ -538,3 +538,40 @@ code {
   gap: 6px;
   margin-top: 8px;
 }
+
+/* ── Aba Contatos (gateway do cerebro) ───────────────────────────────── */
+.contatos-page .card {
+  background: var(--card-bg, rgba(0, 0, 0, 0.03));
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.contatos-header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.contatos-table-wrap {
+  overflow-x: auto;
+}
+.contatos-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92em;
+}
+.contatos-table th,
+.contatos-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+}
+.contato-estado-ativo { color: var(--success, #16a34a); }
+.contato-estado-pendente { color: var(--warning, #d97706); }
+.contato-estado-vencido { color: var(--danger, #dc2626); }
+.contatos-feedback { margin-top: 10px; font-size: 0.9em; }
+.contatos-form .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
