@@ -295,6 +295,45 @@ export async function submeterTemplate(db: SupabaseClient, pedido: PedidoTemplat
   return { nome, idioma, categoria, status: corpo.status ?? 'PENDING', meta_template_id: corpo.id ?? null };
 }
 
+/**
+ * Exclui um template na Meta (por nome — a Graph API apaga todas as variantes
+ * de idioma daquele nome) e remove as linhas locais. Irreversível na Meta.
+ */
+export async function removerTemplate(db: SupabaseClient, params: URLSearchParams) {
+  const metaPhone = params.get('phone');
+  const nome = params.get('nome')?.trim().toLowerCase();
+  if (!metaPhone || !nome) throw new Error('contrato: parâmetros phone e nome são obrigatórios');
+
+  const { data: phone, error: erroPhone } = await db.schema('waba').from('phone_numbers')
+    .select('account_id').eq('meta_phone_number_id', metaPhone).maybeSingle();
+  if (erroPhone) throw erroPhone;
+  if (!phone?.account_id) throw new Error(`contrato: número ${metaPhone} não está no registry`);
+
+  const { data: conta, error: erroConta } = await db.schema('waba').from('accounts')
+    .select('meta_waba_id').eq('id', phone.account_id).maybeSingle();
+  if (erroConta) throw erroConta;
+  const { data: cred, error: erroCred } = await db.schema('waba').from('credentials')
+    .select('token_secret_ref').eq('account_id', phone.account_id).maybeSingle();
+  if (erroCred) throw erroCred;
+  const token = Deno.env.get((cred?.token_secret_ref as string) ?? '');
+  if (!conta?.meta_waba_id || !token) throw new Error('conta sem WABA id ou token configurado');
+
+  const graphVersion = Deno.env.get('GRAPH_VERSION') ?? 'v21.0';
+  const urlMeta = new URL(`https://graph.facebook.com/${graphVersion}/${conta.meta_waba_id}/message_templates`);
+  urlMeta.searchParams.set('name', nome);
+  const res = await fetch(urlMeta, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+  const corpo = await res.json() as { success?: boolean; error?: { message?: string; error_user_msg?: string } };
+  if (!res.ok) {
+    throw new Error(`contrato: Meta recusou a exclusão — ${corpo.error?.error_user_msg ?? corpo.error?.message ?? res.status}`);
+  }
+
+  const { error: erroDelete } = await db.schema('waba').from('templates')
+    .delete().eq('account_id', phone.account_id).eq('name', nome);
+  if (erroDelete) throw erroDelete;
+
+  return { nome, removido: true };
+}
+
 export async function urlDaMidia(db: SupabaseClient, messageId: string | null) {
   if (!messageId) throw new Error('contrato: parâmetro id é obrigatório');
   const { data, error } = await db.schema('waba').from('messages')

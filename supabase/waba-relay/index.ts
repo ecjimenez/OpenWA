@@ -14,7 +14,7 @@
 import { serviceClient } from '../_shared/supabase.ts';
 import { errorMessage, json } from '../_shared/http.ts';
 import { igualSeguro } from '../_shared/tempo_constante.ts';
-import { enviarViaOutbox, listarChats, listarMensagens, listarTemplates, submeterTemplate, subirMidia, urlDaMidia } from '../_shared/waba_relay_core.ts';
+import { enviarViaOutbox, listarChats, listarMensagens, listarTemplates, removerTemplate, submeterTemplate, subirMidia, urlDaMidia } from '../_shared/waba_relay_core.ts';
 import { atualizarContato, criarContato, listarContatos, removerContato } from '../_shared/waba_relay_contatos.ts';
 
 Deno.serve(async (req) => {
@@ -45,6 +45,9 @@ Deno.serve(async (req) => {
     }
     if (req.method === 'POST' && rota === 'templates') {
       return json(await submeterTemplate(db, await req.json()));
+    }
+    if (req.method === 'DELETE' && rota === 'templates') {
+      return json(await removerTemplate(db, url.searchParams));
     }
     if (req.method === 'GET' && rota === 'contacts') {
       return json(await listarContatos(db));
